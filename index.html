@@ -46,6 +46,21 @@
     <div id="loan-forms-container" class="mt-6"></div>
     <button type="button" onclick="compareLoans()" class="px-6 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 mt-4">Compare Loans</button>
     <div id="loan-comparison-result" class="mt-6"></div>
+    <!-- Loan Comparison Table -->
+    <table id="loan-comparison-table" class="mt-6 w-full border-collapse border border-gray-300 hidden">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="border border-gray-300 p-2">Loan Name</th>
+          <th class="border border-gray-300 p-2">Loan Amount ($)</th>
+          <th class="border border-gray-300 p-2">Interest Rate (%)</th>
+          <th class="border border-gray-300 p-2">Loan Term (Years)</th>
+          <th class="border border-gray-300 p-2">Monthly Payment ($)</th>
+          <th class="border border-gray-300 p-2">Total Interest ($)</th>
+          <th class="border border-gray-300 p-2">Total Cost ($)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
     <!-- Mid-Content Ad Section for Loans -->
     <div class="mt-6 text-center bg-gray-100 p-4 rounded shadow">
       <h2 class="text-lg font-bold mb-2">Sponsored Loan Offers</h2>
@@ -143,6 +158,43 @@
       });
 
       document.getElementById('loan-comparison-result').innerHTML = results;
+    }
+  </script>
+<script>
+    function compareLoans() {
+      const loanContainers = document.querySelectorAll('#loan-forms-container > div');
+      const tableBody = document.querySelector('#loan-comparison-table tbody');
+      tableBody.innerHTML = '';
+
+      loanContainers.forEach(container => {
+        const name = container.querySelector('[placeholder="Loan Name"]').value;
+        const amount = parseFloat(container.querySelector('[placeholder="Loan Amount"]').value);
+        const apr = parseFloat(container.querySelector('[placeholder="Interest Rate (APR)"]').value);
+        const termYears = parseFloat(container.querySelector('[placeholder="Loan Term (Years)"]').value || 1);
+
+        // Calculate monthly payment using the formula: M = P[r(1 + r)^n] / [(1 + r)^n - 1]
+        const monthlyRate = apr / 100 / 12;
+        const numberOfPayments = termYears * 12;
+        const monthlyPayment = (amount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+        const totalInterest = (monthlyPayment * numberOfPayments - amount).toFixed(2);
+        const totalCost = (amount + parseFloat(totalInterest)).toFixed(2);
+
+        // Add row to the comparison table
+        const row = `<tr>
+          <td class="border border-gray-300 p-2">${name}</td>
+          <td class="border border-gray-300 p-2">$${amount.toFixed(2)}</td>
+          <td class="border border-gray-300 p-2">${apr.toFixed(2)}%</td>
+          <td class="border border-gray-300 p-2">${termYears} years</td>
+          <td class="border border-gray-300 p-2">$${monthlyPayment.toFixed(2)}</td>
+          <td class="border border-gray-300 p-2">$${totalInterest}</td>
+          <td class="border border-gray-300 p-2">$${totalCost}</td>
+        </tr>`;
+
+        tableBody.insertAdjacentHTML('beforeend', row);
+      });
+
+      // Show the comparison table
+      document.getElementById('loan-comparison-table').classList.remove('hidden');
     }
   </script>
 </body>
